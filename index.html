@@ -1,0 +1,200 @@
+<!doctype html>
+<html>
+<head>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+<style>
+  .slider-handle, #handle-1, #handle-2 {
+    width: 6em;
+    height: 1.6em;
+    top: 50%;
+    margin-top: -.8em;
+    text-align: center;
+    line-height: 1.6em;
+  }
+  .ui-checkboxradio-checked, .ui-checkboxradio-checked .ui-checkboxradio {
+    color: #fff;
+    background: #3f3!important;
+  }
+  .ui-slider {
+    margin: 40px 10px;
+  }
+  #slider-1 { background: #ef2929; }
+  #slider-2 { background: #729fcf; }
+  </style>
+
+<script>
+var audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+
+var o1 = audioCtx.createOscillator();
+
+
+o1.type = 'sine';
+o1.frequency.setValueAtTime(440, audioCtx.currentTime); // value in hertz
+o1.connect(audioCtx.destination);
+
+
+var o2 = audioCtx.createOscillator();
+
+o2.type = 'sine';
+o2.frequency.setValueAtTime(760, audioCtx.currentTime); // value in hertz
+o2.connect(audioCtx.destination);
+
+$( function() {
+    var handle1 = $( "#handle-1" );
+    $( "#slider-1" ).slider({
+      value: 440,
+      min: 0,
+      max: 5000,
+      create: function() {
+        handle1.text( $( this ).slider( "value" ).toString() + " Hz" );
+      },
+      slide: function( event, ui ) {
+        o1.frequency.setValueAtTime(ui.value, audioCtx.currentTime);
+        handle1.text( ui.value.toString() + " Hz" );
+        $( "#h1spin" ).spinner("value", ui.value);
+      },
+      change: function( event, ui ) {
+        o1.frequency.setValueAtTime(ui.value, audioCtx.currentTime);
+        handle1.text( ui.value.toString() + " Hz" );
+        $( "#h1spin" ).spinner("value", ui.value);
+      }
+    });
+
+    var handle2 = $( "#handle-2" );
+    $( "#slider-2" ).slider({
+      value: 760,
+      min: 0,
+      max: 5000,
+      create: function() {
+        handle2.text( $( this ).slider( "value" ).toString() + " Hz" );
+      },
+      slide: function( event, ui ) {
+        o2.frequency.setValueAtTime(ui.value, audioCtx.currentTime);
+        handle2.text( ui.value.toString() + " Hz" );
+
+        $( "#h2spin" ).spinner("value", ui.value);
+      },
+      change: function( event, ui ) {
+        o2.frequency.setValueAtTime(ui.value, audioCtx.currentTime);
+        handle2.text( ui.value.toString() + " Hz" );
+        $( "#h2spin" ).spinner("value", ui.value);
+      }
+    });
+
+    $( ".enablebox" ).checkboxradio({
+      icon: false
+    });
+
+    $('#checkbox-nested-1').bind('change', function(){
+        if($(this).is(':checked')){
+            o1 = audioCtx.createOscillator();
+			o1.type = $('#type-1').val();
+			o1.frequency.setValueAtTime($( "#slider-1" ).slider("value"), audioCtx.currentTime);
+			o1.connect(audioCtx.destination);
+          o1.start();
+        } else {
+          o1.stop();
+        }
+    });
+
+
+        $('#checkbox-nested-2').bind('change', function(){
+            if($(this).is(':checked')){
+                o2 = audioCtx.createOscillator();
+			o2.type = $('#type-2').val();
+			o2.frequency.setValueAtTime($( "#slider-2" ).slider("value"), audioCtx.currentTime);
+			o2.connect(audioCtx.destination);
+              o2.start();
+            } else {
+              o2.stop();
+            }
+        });
+
+          $('#type-1').selectmenu({
+            'select':function( event, ui ) {
+              o1.type = $('#type-1').val();
+              console.log($('#type-1').val());
+            }
+          });
+
+          $('#type-2').selectmenu({
+            'select':function( event, ui ) {
+              o2.type = $('#type-2').val();
+              console.log($('#type-2').val());
+            }
+          });
+
+
+
+$("#h1spin").spinner({value: 440,
+min: 0,
+max: 5000,
+change: function(event, ui) {
+  $( "#slider-1" ).slider("value", $("#h1spin").val());
+},
+spin: function(event, ui) {
+  $( "#slider-1" ).slider("value", ui.value);
+}
+});
+
+
+
+$("#h2spin").spinner({value: 760,
+min: 0,
+max: 5000,
+change: function(event, ui) {
+  $( "#slider-2" ).slider("value", $("#h2spin").val());
+},
+spin: function(event, ui) {
+  $( "#slider-2" ).slider("value", ui.value);
+}
+});
+
+
+  } );
+
+</script>
+</head>
+<body>
+
+  <label for="checkbox-nested-1">Enable Tone #1
+        <input type="checkbox" class="enablebox" name="checkbox-nested-1" id="checkbox-nested-1">
+      </label>
+    <select name="type-1" id="type-1">
+      <option value="sine" selected="selected">sine</option>
+      <option value="square" >square</option>
+      <option value="sawtooth" >sawtooth</option>
+      <option value="triangle" >triangle</option>
+    </select>
+
+
+      <input id="h1spin" name="h1spin" value="440"><label for="h1spin">Hz</label>
+<div id="slider-1">
+  <div id="handle-1" class="ui-slider-handle slider-handle">
+  </div>
+</div>
+
+
+  <label for="checkbox-nested-2">Enable Tone #2
+        <input type="checkbox"  class="enablebox" name="checkbox-nested-2" id="checkbox-nested-2">
+      </label>
+
+    <select name="type-2" id="type-2">
+      <option value="sine" selected="selected">sine</option>
+      <option value="square" >square</option>
+      <option value="sawtooth" >sawtooth</option>
+      <option value="triangle" >triangle</option>
+    </select>
+
+          <input id="h2spin" name="h2spin" value="760"><label for="h2spin">Hz</label>
+<div id="slider-2">
+  <div id="handle-2" class="ui-slider-handle slider-handle"></div>
+</div>
+
+
+
+</body>
+</html>
